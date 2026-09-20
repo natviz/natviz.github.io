@@ -1,8 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
 <title>Наталья Алексеева — 3D-визуализатор интерьеров и помощник дизайнера</title>
   <meta name="description" content="Наталья Алексеева — профессиональная 3D-визуализация интерьеров и подбор решений для вашего проекта. Свяжитесь по телефону 8 904 617-66-61.">
   <meta name="robots" content="index, follow">
@@ -1270,6 +1272,56 @@ section {
   opacity: 1;
 }
 
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  z-index: 5;
+}
+
+.lightbox__nav:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.lightbox__nav--prev {
+  left: 20px;
+}
+
+.lightbox__nav--next {
+  right: 20px;
+}
+
+@media (max-width: 600px) {
+  .lightbox__nav {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+  }
+
+  .lightbox__nav--prev {
+    left: 10px;
+  }
+
+  .lightbox__nav--next {
+    right: 10px;
+  }
+}
+
 /* Reveal animation */
 .reveal {
   opacity: 0;
@@ -1365,6 +1417,150 @@ section {
 
   section {
     padding: 68px 0;
+  }
+}
+
+/* ===== Пасхалка: маленькая девочка ===== */
+.easter-stage {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+}
+.easter-stage,
+.easter-stage * {
+  pointer-events: none;
+}
+.easter-girl {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 96px;
+  height: 120px;
+  opacity: 0;
+  will-change: left, top;
+  transition: left 0.5s ease, top 0.5s ease, opacity 0.22s ease;
+}
+.easter-girl .egg-bob {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+}
+.easter-girl svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.easter-girl.egg-left {
+  transform: scaleX(1);
+}
+.easter-girl.egg-right {
+  transform: scaleX(-1);
+}
+.easter-girl.is-visible {
+  opacity: 1;
+}
+.easter-girl.is-running .egg-bob {
+  animation: egg-run 0.32s ease-in-out infinite;
+}
+.easter-girl.egg-tilt .egg-bob {
+  animation: egg-tilt-anim 0.8s ease-in-out infinite alternate;
+}
+.easter-girl.egg-nod .egg-bob {
+  animation: egg-nod-anim 0.55s ease-in-out 2;
+}
+@keyframes egg-run {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.2deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(1.2deg);
+  }
+}
+@keyframes egg-tilt-anim {
+  0% {
+    transform: rotate(-6deg);
+  }
+  100% {
+    transform: rotate(5deg);
+  }
+}
+@keyframes egg-nod-anim {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  50% {
+    transform: rotate(-8deg);
+  }
+}
+.egg-eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: egg-blink 4.6s infinite;
+}
+.egg-eye.egg-eye-r {
+  animation-delay: 0.42s;
+}
+@keyframes egg-blink {
+  0%,
+  82%,
+  100% {
+    transform: scaleY(1);
+  }
+  86%,
+  96% {
+    transform: scaleY(0.12);
+  }
+}
+.easter-girl.egg-squint .egg-eye {
+  animation: none;
+  transform: scaleY(0.4);
+}
+.egg-mouth {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.egg-mag,
+.egg-star {
+  opacity: 0;
+}
+.easter-girl.egg-mag .egg-mag {
+  opacity: 1;
+}
+.easter-girl.egg-happy .egg-star {
+  opacity: 1;
+}
+.easter-girl.egg-chew .egg-mouth {
+  animation: egg-chew-anim 0.28s ease-in-out infinite;
+}
+@keyframes egg-chew-anim {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.55);
+  }
+}
+.egg-letter {
+  position: relative;
+  display: inline-block;
+  will-change: transform;
+}
+.egg-letter.bitten {
+  clip-path: polygon(0% 0%, 62% 0%, 46% 46%, 60% 100%, 0% 100%);
+}
+@media (max-width: 600px) {
+  .easter-girl {
+    width: 68px;
+    height: 85px;
+  }
+  .egg-mag,
+  .egg-star {
+    display: none;
   }
 }
 
@@ -2423,9 +2619,11 @@ section {
     </div>
   </footer>
 
-  <div class="lightbox" id="lightbox">
+<div class="lightbox" id="lightbox">
     <button class="lightbox__close" id="lightboxClose" aria-label="Закрыть">&times;</button>
+    <button class="lightbox__nav lightbox__nav--prev" id="lightboxPrev" aria-label="Предыдущее изображение">&larr;</button>
     <img id="lightboxImg" src="" alt="Увеличенная работа">
+    <button class="lightbox__nav lightbox__nav--next" id="lightboxNext" aria-label="Следующее изображение">&rarr;</button>
   </div>
 
   <script>
@@ -2443,19 +2641,50 @@ document.querySelectorAll(".header__nav a").forEach((link) => {
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
 const lightboxClose = document.getElementById("lightboxClose");
+const lightboxPrev = document.getElementById("lightboxPrev");
+const lightboxNext = document.getElementById("lightboxNext");
 
-document.querySelectorAll(".work img").forEach((img) => {
+let lightboxGroup = [];
+let lightboxIndex = 0;
+
+function openLightbox(img, group) {
+  lightboxGroup = Array.prototype.slice.call(group || [img]);
+  lightboxIndex = lightboxGroup.indexOf(img);
+  if (lightboxIndex < 0) lightboxIndex = 0;
+  updateLightbox();
+  lightbox.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function updateLightbox() {
+  const img = lightboxGroup[lightboxIndex];
+  if (!img) return;
+  lightboxImg.src = img.src;
+  lightboxImg.alt = img.alt;
+  if (lightboxPrev) lightboxPrev.style.visibility = lightboxGroup.length > 1 ? "visible" : "hidden";
+  if (lightboxNext) lightboxNext.style.visibility = lightboxGroup.length > 1 ? "visible" : "hidden";
+}
+
+function stepLightbox(dir) {
+  if (!lightboxGroup.length) return;
+  lightboxIndex = (lightboxIndex + dir + lightboxGroup.length) % lightboxGroup.length;
+  updateLightbox();
+}
+
+document.querySelectorAll(".work").forEach((work) => {
+  const img = work.querySelector("img");
+  if (!img) return;
   img.addEventListener("click", () => {
-    lightboxImg.src = img.src;
-    lightboxImg.alt = img.alt;
-    lightbox.classList.add("open");
-    document.body.style.overflow = "hidden";
+    const pop = work.closest(".project-pop") || work.closest(".portfolio");
+    const group = pop ? pop.querySelectorAll(".work img") : [img];
+    openLightbox(img, group);
   });
 });
 
 function closeLightbox() {
   lightbox.classList.remove("open");
   lightboxImg.src = "";
+  lightboxGroup = [];
   document.body.style.overflow = "";
 }
 
@@ -2463,8 +2692,18 @@ lightboxClose.addEventListener("click", closeLightbox);
 lightbox.addEventListener("click", (e) => {
   if (e.target === lightbox) closeLightbox();
 });
+if (lightboxPrev) lightboxPrev.addEventListener("click", (e) => {
+  e.stopPropagation();
+  stepLightbox(-1);
+});
+if (lightboxNext) lightboxNext.addEventListener("click", (e) => {
+  e.stopPropagation();
+  stepLightbox(1);
+});
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeLightbox();
+  if (e.key === "ArrowLeft") stepLightbox(-1);
+  if (e.key === "ArrowRight") stepLightbox(1);
 });
 
 const projectCards = document.querySelectorAll(".project-card");
@@ -2818,6 +3057,365 @@ function setMapData() {
 
 animateProjectCount();
 setMapData();
+
+/* =====================================================
+   Пасхалка: маленькая девочка-блондинка
+   -----------------------------------------------------
+   Отключить:  EASTER_EGG.enabled = false
+   Задержка:   EASTER_EGG.IDLE_DELAY (мс) — бездействие
+     до случайного запуска сценария (по умолчанию 3000)
+   -----------------------------------------------------
+   Слой поверх страницы, pointer-events: none —
+   не мешает обычному взаимодействию с сайтом.
+   ===================================================== */
+(function () {
+  const EASTER_EGG = {
+    enabled: true,      // false — полностью отключить пасхалку
+    IDLE_DELAY: 3000,   // мс бездействия до запуска
+    COOLDOWN: 9000      // мс паузы между сценариями
+  };
+  if (!EASTER_EGG.enabled) return;
+
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+  const GIRL_SVG =
+    '<svg class="egg-svg" viewBox="0 0 90 112" role="img" aria-label="маленькая хулиганистая девочка">' +
+    '<ellipse cx="45" cy="106" rx="26" ry="4" fill="rgba(0,0,0,0.08)"/>' +
+    '<path d="M45 6 C72 6 85 26 82 52 C80 76 68 92 45 92 C22 92 10 76 8 52 C5 26 18 6 45 6 Z" fill="#F3C55C"/>' +
+    '<circle cx="6" cy="56" r="9" fill="#F3C55C"/>' +
+    '<circle cx="84" cy="56" r="9" fill="#F3C55C"/>' +
+    '<path d="M0 62 q2 12 10 14" stroke="#F3C55C" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+    '<path d="M90 62 q-2 12 -10 14" stroke="#F3C55C" stroke-width="5" fill="none" stroke-linecap="round"/>' +
+    '<circle cx="6" cy="64" r="2.2" fill="#E8795A"/>' +
+    '<circle cx="84" cy="64" r="2.2" fill="#E8795A"/>' +
+    '<ellipse cx="45" cy="56" rx="19" ry="20" fill="#FFE7CF"/>' +
+    '<path d="M27 48 Q29 28 45 28 Q61 28 63 48 Q56 40 45 42 Q34 40 27 48 Z" fill="#F3C55C"/>' +
+    '<path d="M30 48 Q36 44 42 47" stroke="#8A5A33" stroke-width="2.4" stroke-linecap="round" fill="none"/>' +
+    '<path d="M48 47 Q54 44 60 48" stroke="#8A5A33" stroke-width="2.4" stroke-linecap="round" fill="none"/>' +
+    '<g class="egg-eye">' +
+    '<ellipse cx="35" cy="57" rx="6.4" ry="8" fill="#fff" stroke="#5C3A1E" stroke-width="1.6"/>' +
+    '<circle cx="35" cy="58" r="3.6" fill="#7A4E24"/>' +
+    '<circle cx="35" cy="58" r="1.8" fill="#241505"/>' +
+    '<circle cx="33.5" cy="55.5" r="1.4" fill="#fff"/>' +
+    '</g>' +
+    '<g class="egg-eye">' +
+    '<ellipse cx="55" cy="57" rx="6.4" ry="8" fill="#fff" stroke="#5C3A1E" stroke-width="1.6"/>' +
+    '<circle cx="55" cy="58" r="3.6" fill="#7A4E24"/>' +
+    '<circle cx="55" cy="58" r="1.8" fill="#241505"/>' +
+    '<circle cx="53.5" cy="55.5" r="1.4" fill="#fff"/>' +
+    '</g>' +
+    '<path d="M44 63 q1 2 2 0" stroke="#D9A26F" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
+    '<ellipse cx="29" cy="63" rx="3.6" ry="2.2" fill="#F49B83" opacity="0.55"/>' +
+    '<ellipse cx="61" cy="63" rx="3.6" ry="2.2" fill="#F49B83" opacity="0.55"/>' +
+    '<path d="M40 69 q5 4 10 0" stroke="#B3452D" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
+    '<path d="M33 80 Q45 76 57 80 L64 104 Q45 110 26 104 Z" fill="#E8795A"/>' +
+    '<path d="M35 80 Q45 84 55 80 L54 86 Q45 90 36 86 Z" fill="#FCE9DA"/>' +
+    '<path d="M30 82 q-6 10 -4 18" stroke="#FFE7CF" stroke-width="6" fill="none" stroke-linecap="round"/>' +
+    '<path d="M60 82 q6 10 4 18" stroke="#FFE7CF" stroke-width="6" fill="none" stroke-linecap="round"/>' +
+    '<path d="M38 104 v6" stroke="#FFE7CF" stroke-width="7" stroke-linecap="round"/>' +
+    '<path d="M52 104 v6" stroke="#FFE7CF" stroke-width="7" stroke-linecap="round"/>' +
+    '<path d="M33 111 h10" stroke="#B07A48" stroke-width="5" stroke-linecap="round"/>' +
+    '<path d="M47 111 h10" stroke="#B07A48" stroke-width="5" stroke-linecap="round"/>' +
+    '<g class="egg-mag">' +
+    '<circle cx="60" cy="50" r="10" fill="#DCF3FA" stroke="#C9923C" stroke-width="3"/>' +
+    '<circle cx="57" cy="47" r="2.6" fill="#fff" opacity="0.9"/>' +
+    '<path d="M67 57 l9 11" stroke="#C9923C" stroke-width="4" stroke-linecap="round"/>' +
+    '</g>' +
+    '<g class="egg-star">' +
+    '<path d="M72 22 l3 6 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1 Z" fill="#F9C74F"/>' +
+    '<circle cx="83" cy="36" r="1.6" fill="#F9C74F"/>' +
+    '<circle cx="68" cy="40" r="1.2" fill="#F9C74F"/>' +
+    '</g>' +
+    '</svg>';
+
+  const stage = document.createElement("div");
+  stage.className = "easter-stage";
+  stage.innerHTML =
+    '<div class="easter-girl egg-left" id="easterGirl"><div class="egg-bob">' + GIRL_SVG + "</div></div>";
+  document.body.appendChild(stage);
+
+  const girl = stage.firstElementChild;
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  const reduceReflow = () => { void girl.offsetLeft; };
+
+  function setFace(dir) {
+    girl.classList.toggle("egg-right", dir === -1);
+    girl.classList.toggle("egg-left", dir === 1);
+  }
+
+  function showGirl() { girl.classList.add("is-visible"); }
+  function hideGirl() {
+    girl.classList.remove("is-running", "egg-tilt", "egg-nod", "egg-chew", "egg-squint", "egg-mag", "egg-happy");
+    girl.classList.remove("is-visible");
+  }
+
+  function jumpGirl(x, y) {
+    girl.style.transition = "none";
+    girl.style.left = x + "px";
+    girl.style.top = y + "px";
+    reduceReflow();
+  }
+
+  function moveTo(x, y, dur, face) {
+    if (face) setFace(face);
+    return new Promise((res) => {
+      girl.style.transition = "left " + dur + "ms cubic-bezier(0.4,0.2,0.3,1), top " + dur + "ms cubic-bezier(0.4,0.2,0.3,1)";
+      girl.style.left = x + "px";
+      girl.style.top = y + "px";
+      setTimeout(res, dur + 60);
+    });
+  }
+
+  function letterAbs(span, rect, ax, ay, ms) {
+    span.style.transition = "transform " + ms + "ms cubic-bezier(0.3,0.4,0.4,1)";
+    span.style.transform = "translate(" + (ax - rect.left) + "px," + (ay - rect.top) + "px)";
+  }
+
+  function letterHome(span) {
+    span.style.transition = "transform 0.8s cubic-bezier(0.16,0.9,0.3,1.15)";
+    span.style.transform = "translate(0,0)";
+  }
+
+  function removeSpan(span) {
+    const t = document.createTextNode(span.textContent || "");
+    span.parentNode.replaceChild(t, span);
+  }
+
+  function cleanup() {
+    stage.querySelectorAll(".egg-letter").forEach((sp) => {
+      sp.classList.remove("bitten");
+      sp.style.transition = "none";
+      sp.style.transform = "translate(0,0)";
+      removeSpan(sp);
+    });
+    hideGirl();
+  }
+
+  /* Случайная буква в обычном тексте (не в портфолио, не в попапах). */
+  function pickLetter() {
+    const modes = ["h1", "h2", "h3", "h4", "h5", "p", "li", "figcaption", "blockquote", "strong", "em", "span"];
+    const els = document.querySelectorAll(modes.join(","));
+    const pool = [];
+    for (let i = 0; i < els.length; i++) {
+      const el = els[i];
+      if (el.closest(".portfolio, .map-tip, .lightbox, .project-pop, .header, .header__nav, header, footer, nav, .easter-stage, .contacts, .stats, .egg-letter, a, button, [data-open], [hidden]")) continue;
+      const cs = window.getComputedStyle(el);
+      if (cs.display === "none" || cs.visibility === "hidden") continue;
+      const r = el.getBoundingClientRect();
+      if (r.width < 20 || r.height < 8) continue;
+      if (r.right < 0 || r.left > innerWidth || r.bottom < 0 || r.top > innerHeight) continue;
+      if (!el.textContent || el.textContent.trim().length < 8) continue;
+      pool.push(el);
+    }
+    if (!pool.length) return null;
+
+    const el = pool[Math.floor(Math.random() * pool.length)];
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        return n.data && n.data.trim().length > 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    if (!nodes.length) return null;
+
+    const tn = nodes[Math.floor(Math.random() * nodes.length)];
+    const data = tn.data;
+    const idxs = [];
+    for (let i = 0; i < data.length; i++) {
+      if (/[\p{L}]/u.test(data[i])) idxs.push(i);
+    }
+    if (!idxs.length) return null;
+    const idx = idxs[Math.floor(Math.random() * idxs.length)];
+
+    const range = document.createRange();
+    range.setStart(tn, idx);
+    range.setEnd(tn, idx + 1);
+    const span = document.createElement("span");
+    span.className = "egg-letter";
+    span.setAttribute("data-egg", "1");
+    try {
+      range.surroundContents(span);
+    } catch (e) {
+      return null;
+    }
+    return span;
+  }
+
+  /* Видимая картинка портфолио для «Инспектора». */
+  function pickPortImage() {
+    const imgs = document.querySelectorAll(".project-card__cover img, .work img");
+    for (let i = 0; i < imgs.length; i++) {
+      const r = imgs[i].getBoundingClientRect();
+      if (r.width < 80 || r.height < 60) continue;
+      if (r.right < 40 || r.left > innerWidth - 40 || r.bottom < 40 || r.top > innerHeight - 40) continue;
+      return { img: imgs[i], rect: r };
+    }
+    return null;
+  }
+
+  const W = () => innerWidth;
+  const H = () => innerHeight;
+  const GIRL_W = 96;
+  const GIRL_H = 120;
+
+  /* --- Сценарий 1: Воровка буквы --- */
+  async function sceneThief() {
+    const span = pickLetter();
+    if (!span) return;
+    const rect = span.getBoundingClientRect();
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    const cy = clamp(rect.top + 6, 44, H() - GIRL_H);
+
+    setFace(dir);
+    jumpGirl(dir === -1 ? -GIRL_W - 40 : W() + 30, cy);
+    showGirl();
+    girl.classList.add("is-running");
+    await moveTo(dir === -1 ? -GIRL_W - 10 : W() + 10, cy, 60, dir);
+
+    const standX = clamp(rect.left - dir * 36, 8, Math.max(8, W() - GIRL_W - 8));
+    await moveTo(standX, cy, 520, dir);
+
+    const handX = standX + dir * 24;
+    const handY = cy + 44;
+    letterAbs(span, rect, handX, handY, 140);
+    await sleep(240);
+
+    const exitDir = -dir;
+    const exitX = exitDir === 1 ? W() + 110 : -GIRL_W - 60;
+    const letterExit = { x: exitX + (exitDir === 1 ? 34 : -34), y: cy + 44 };
+    const p = moveTo(exitX, cy, 620, exitDir);
+    letterAbs(span, rect, letterExit.x, letterExit.y, 620);
+    await p;
+    girl.classList.remove("is-running");
+    hideGirl();
+
+    await sleep(1300);
+    letterHome(span);
+    await sleep(900);
+    removeSpan(span);
+  }
+
+  /* --- Сценарий 2: Инспектор --- */
+  async function sceneInspector() {
+    const t = pickPortImage();
+    if (!t) return;
+    const r = t.rect;
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    const cy = clamp(r.top + r.height / 2 - GIRL_H / 2, 44, H() - GIRL_H);
+    const standX = clamp(dir === 1 ? r.left - GIRL_W - 14 : r.right + 12, 8, W() - GIRL_W - 8);
+
+    setFace(-dir);
+    jumpGirl(dir === 1 ? r.left - GIRL_W - 140 : r.right + 100, cy);
+    showGirl();
+    girl.classList.add("is-running");
+    await moveTo(standX, cy, 600, -dir);
+    girl.classList.remove("is-running");
+
+    girl.classList.add("egg-squint");
+    await moveTo(standX, cy - 10, 240);
+    await sleep(320);
+    girl.classList.add("egg-mag");
+    girl.classList.add("egg-tilt");
+    await sleep(700);
+    girl.classList.remove("egg-tilt");
+    girl.classList.add("egg-squint");
+    await moveTo(standX, cy, 260, -dir);
+    await sleep(400);
+    girl.classList.add("egg-tilt");
+    await sleep(650);
+    girl.classList.remove("egg-tilt", "egg-squint", "egg-mag");
+
+    girl.classList.add("egg-nod");
+    girl.classList.add("egg-happy");
+    await sleep(750);
+    girl.classList.remove("egg-nod", "egg-happy");
+
+    const exitDir = -dir;
+    const exitX = exitDir === 1 ? W() + 70 : -GIRL_W - 60;
+    girl.classList.add("is-running");
+    await moveTo(exitX, cy, 600, exitDir);
+    girl.classList.remove("is-running");
+    hideGirl();
+  }
+
+  /* --- Сценарий 3: Голодная --- */
+  async function sceneHungry() {
+    const span = pickLetter();
+    if (!span) return;
+    const rect = span.getBoundingClientRect();
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    const cy = clamp(rect.top + 6, 44, H() - GIRL_H);
+
+    setFace(dir);
+    jumpGirl(dir === -1 ? -GIRL_W - 40 : W() + 30, cy);
+    showGirl();
+    girl.classList.add("is-running");
+    await moveTo(dir === -1 ? -GIRL_W - 10 : W() + 10, cy, 60, dir);
+
+    const standX = clamp(rect.left - dir * 40, 8, Math.max(8, W() - GIRL_W - 8));
+    await moveTo(standX, cy, 540, dir);
+    girl.classList.remove("is-running");
+
+    const mouthX = standX + dir * 12;
+    const mouthY = cy + 18;
+    letterAbs(span, rect, mouthX, mouthY, 140);
+    await sleep(220);
+    span.classList.add("bitten");
+    girl.classList.add("egg-chew");
+    await sleep(620);
+    girl.classList.remove("egg-chew");
+
+    girl.classList.add("egg-happy");
+    await sleep(820);
+    girl.classList.remove("egg-happy");
+
+    const exitDir = -dir;
+    const exitX = exitDir === 1 ? W() + 110 : -GIRL_W - 60;
+    const p = moveTo(exitX, cy, 600, exitDir);
+    span.classList.remove("bitten");
+    letterHome(span);
+    await p;
+    girl.classList.remove("is-running");
+    hideGirl();
+
+    await sleep(600);
+    removeSpan(span);
+  }
+
+  /* --- Таймер бездействия + запуск --- */
+  let lastActivity = Date.now();
+  let busy = false;
+  let nextRunAt = Date.now() + EASTER_EGG.COOLDOWN;
+
+  const refreshActivity = () => { lastActivity = Date.now(); };
+  const activityEvts = ["mousemove", "mousedown", "pointerdown", "keydown", "wheel", "scroll", "touchstart", "touchmove", "click"];
+  activityEvts.forEach((ev) => window.addEventListener(ev, refreshActivity, { passive: true }));
+
+  function runRandomScene() {
+    busy = true;
+    const key = Math.random();
+    const p =
+      key < 0.34 ? sceneThief() :
+      key < 0.67 ? sceneInspector() :
+      sceneHungry();
+    Promise.resolve(p).catch(function () {}).then(function () {
+      cleanup();
+      nextRunAt = Date.now() + EASTER_EGG.COOLDOWN;
+      busy = false;
+    });
+  }
+
+  setInterval(function () {
+    if (!EASTER_EGG.enabled || busy) return;
+    if (document.visibilityState !== "visible") return;
+    if (Date.now() < nextRunAt) return;
+    if (Date.now() - lastActivity < EASTER_EGG.IDLE_DELAY) return;
+    if (document.querySelector(".lightbox.open, .project-pop.open")) return;
+    runRandomScene();
+  }, 400);
+})();
 
 </script>
 </body>
