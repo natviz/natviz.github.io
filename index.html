@@ -1420,7 +1420,7 @@ section {
   }
 }
 
-/* ===== Пасхалка: маленькая девочка ===== */
+/* ===== Пасхалка: маленький котёнок-озорник ===== */
 .easter-stage {
   position: fixed;
   inset: 0;
@@ -1446,10 +1446,13 @@ section {
   height: 100%;
   transform-origin: 50% 100%;
 }
-.easter-girl svg {
+.easter-girl svg,
+.easter-girl img.egg-svg {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
   overflow: visible;
 }
 .easter-girl.egg-left {
@@ -1462,21 +1465,91 @@ section {
   opacity: 1;
 }
 .easter-girl.is-running .egg-bob {
-  animation: egg-run 0.32s ease-in-out infinite;
+  animation: egg-run 0.4s ease-in-out infinite;
 }
-.easter-girl.egg-tilt .egg-bob {
+.easter-girl.is-walking .egg-bob {
+  animation: egg-run 0.6s ease-in-out infinite;
+}
+.easter-girl.egg-tilt .egg-head {
   animation: egg-tilt-anim 0.8s ease-in-out infinite alternate;
 }
-.easter-girl.egg-nod .egg-bob {
+.easter-girl.egg-nod .egg-head {
   animation: egg-nod-anim 0.55s ease-in-out 2;
+}
+.easter-girl .egg-head {
+  transform-box: view-box;
+  transform-origin: 43px 63px;
+  will-change: transform;
 }
 @keyframes egg-run {
   0%,
   100% {
-    transform: translateY(0) rotate(-1.2deg);
+    transform: translateY(-1px) rotate(-1.4deg);
   }
   50% {
-    transform: translateY(-4px) rotate(1.2deg);
+    transform: translateY(-5px) rotate(1.4deg);
+  }
+}
+.easter-girl .egg-leg-fb,
+.easter-girl .egg-leg-fn,
+.easter-girl .egg-leg-bb,
+.easter-girl .egg-leg-bn {
+  transform-box: view-box;
+  will-change: transform;
+}
+.easter-girl .egg-leg-fb {
+  transform-origin: 36px 91px;
+}
+.easter-girl .egg-leg-fn {
+  transform-origin: 41px 91px;
+}
+.easter-girl .egg-leg-bb {
+  transform-origin: 59px 91px;
+}
+.easter-girl .egg-leg-bn {
+  transform-origin: 62px 91px;
+}
+.easter-girl.is-running .egg-leg-fb,
+.easter-girl.is-running .egg-leg-bn {
+  animation: egg-leg-a 0.4s linear infinite;
+}
+.easter-girl.is-running .egg-leg-fn,
+.easter-girl.is-running .egg-leg-bb {
+  animation: egg-leg-b 0.4s linear infinite;
+}
+.easter-girl .egg-tail {
+  transform-box: view-box;
+  transform-origin: 63px 89px;
+  will-change: transform;
+}
+.easter-girl.is-running .egg-tail {
+  animation: egg-tail-wag 0.4s ease-in-out infinite;
+}
+@keyframes egg-leg-a {
+  0%,
+  100% {
+    transform: rotate(-16deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+}
+@keyframes egg-leg-b {
+  0%,
+  100% {
+    transform: rotate(16deg);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+@keyframes egg-tail-wag {
+  0%,
+  100% {
+    transform: rotate(6deg);
+  }
+  50% {
+    transform: rotate(-7deg);
   }
 }
 @keyframes egg-tilt-anim {
@@ -1544,6 +1617,79 @@ section {
   50% {
     transform: scaleY(0.55);
   }
+}
+.easter-girl .egg-dust {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  width: 40px;
+  height: 16px;
+  margin-left: -20px;
+  pointer-events: none;
+}
+.easter-girl .egg-dust i {
+  position: absolute;
+  display: block;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(149, 103, 62, 0.34);
+  opacity: 0;
+}
+.easter-girl.is-running .egg-dust i {
+  animation: egg-dust-anim 0.6s ease-out infinite;
+}
+.easter-girl.is-running .egg-dust i:nth-child(1) {
+  animation-delay: 0s;
+  left: 4px;
+  bottom: 2px;
+}
+.easter-girl.is-running .egg-dust i:nth-child(2) {
+  animation-delay: 0.1s;
+  left: 20px;
+  bottom: 0;
+}
+.easter-girl.is-running .egg-dust i:nth-child(3) {
+  animation-delay: 0.2s;
+  left: 30px;
+  bottom: 3px;
+}
+.easter-girl.is-running .egg-dust i:nth-child(4) {
+  animation-delay: 0.3s;
+  left: -2px;
+  bottom: 1px;
+}
+.easter-girl.is-running .egg-dust i:nth-child(5) {
+  animation-delay: 0.4s;
+  left: 12px;
+  bottom: 0;
+}
+.easter-girl.is-running .egg-dust i:nth-child(6) {
+  animation-delay: 0.5s;
+  left: 26px;
+  bottom: 4px;
+}
+@keyframes egg-dust-anim {
+  0% {
+    opacity: 0.55;
+    transform: translate(0, 0) scale(0.4);
+  }
+  60% {
+    opacity: 0.22;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dsx, 0), -16px) scale(1.5) rotate(var(--dsr, 0deg));
+  }
+}
+.easter-girl.is-running .egg-dust i:nth-child(odd) {
+  --dsx: -9px;
+  --dsr: -32deg;
+}
+.easter-girl.is-running .egg-dust i:nth-child(even) {
+  --dsx: 10px;
+  --dsr: 30deg;
 }
 .egg-letter {
   position: relative;
@@ -3059,7 +3205,7 @@ animateProjectCount();
 setMapData();
 
 /* =====================================================
-   Пасхалка: маленькая девочка-блондинка
+   Пасхалка: котёнок-озорник
    -----------------------------------------------------
    Отключить:  EASTER_EGG.enabled = false
    Задержка:   EASTER_EGG.IDLE_DELAY (мс) — бездействие
@@ -3072,66 +3218,18 @@ setMapData();
   const EASTER_EGG = {
     enabled: true,      // false — полностью отключить пасхалку
     IDLE_DELAY: 3000,   // мс бездействия до запуска
-    COOLDOWN: 9000      // мс паузы между сценариями
+    COOLDOWN: 6000      // мс паузы между сценариями
   };
   if (!EASTER_EGG.enabled) return;
 
   if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-  const GIRL_SVG =
-    '<svg class="egg-svg" viewBox="0 0 90 112" role="img" aria-label="маленькая хулиганистая девочка">' +
-    '<ellipse cx="45" cy="106" rx="26" ry="4" fill="rgba(0,0,0,0.08)"/>' +
-    '<path d="M45 6 C72 6 85 26 82 52 C80 76 68 92 45 92 C22 92 10 76 8 52 C5 26 18 6 45 6 Z" fill="#F3C55C"/>' +
-    '<circle cx="6" cy="56" r="9" fill="#F3C55C"/>' +
-    '<circle cx="84" cy="56" r="9" fill="#F3C55C"/>' +
-    '<path d="M0 62 q2 12 10 14" stroke="#F3C55C" stroke-width="5" fill="none" stroke-linecap="round"/>' +
-    '<path d="M90 62 q-2 12 -10 14" stroke="#F3C55C" stroke-width="5" fill="none" stroke-linecap="round"/>' +
-    '<circle cx="6" cy="64" r="2.2" fill="#E8795A"/>' +
-    '<circle cx="84" cy="64" r="2.2" fill="#E8795A"/>' +
-    '<ellipse cx="45" cy="56" rx="19" ry="20" fill="#FFE7CF"/>' +
-    '<path d="M27 48 Q29 28 45 28 Q61 28 63 48 Q56 40 45 42 Q34 40 27 48 Z" fill="#F3C55C"/>' +
-    '<path d="M30 48 Q36 44 42 47" stroke="#8A5A33" stroke-width="2.4" stroke-linecap="round" fill="none"/>' +
-    '<path d="M48 47 Q54 44 60 48" stroke="#8A5A33" stroke-width="2.4" stroke-linecap="round" fill="none"/>' +
-    '<g class="egg-eye">' +
-    '<ellipse cx="35" cy="57" rx="6.4" ry="8" fill="#fff" stroke="#5C3A1E" stroke-width="1.6"/>' +
-    '<circle cx="35" cy="58" r="3.6" fill="#7A4E24"/>' +
-    '<circle cx="35" cy="58" r="1.8" fill="#241505"/>' +
-    '<circle cx="33.5" cy="55.5" r="1.4" fill="#fff"/>' +
-    '</g>' +
-    '<g class="egg-eye">' +
-    '<ellipse cx="55" cy="57" rx="6.4" ry="8" fill="#fff" stroke="#5C3A1E" stroke-width="1.6"/>' +
-    '<circle cx="55" cy="58" r="3.6" fill="#7A4E24"/>' +
-    '<circle cx="55" cy="58" r="1.8" fill="#241505"/>' +
-    '<circle cx="53.5" cy="55.5" r="1.4" fill="#fff"/>' +
-    '</g>' +
-    '<path d="M44 63 q1 2 2 0" stroke="#D9A26F" stroke-width="1.6" fill="none" stroke-linecap="round"/>' +
-    '<ellipse cx="29" cy="63" rx="3.6" ry="2.2" fill="#F49B83" opacity="0.55"/>' +
-    '<ellipse cx="61" cy="63" rx="3.6" ry="2.2" fill="#F49B83" opacity="0.55"/>' +
-    '<path d="M40 69 q5 4 10 0" stroke="#B3452D" stroke-width="2.2" fill="none" stroke-linecap="round"/>' +
-    '<path d="M33 80 Q45 76 57 80 L64 104 Q45 110 26 104 Z" fill="#E8795A"/>' +
-    '<path d="M35 80 Q45 84 55 80 L54 86 Q45 90 36 86 Z" fill="#FCE9DA"/>' +
-    '<path d="M30 82 q-6 10 -4 18" stroke="#FFE7CF" stroke-width="6" fill="none" stroke-linecap="round"/>' +
-    '<path d="M60 82 q6 10 4 18" stroke="#FFE7CF" stroke-width="6" fill="none" stroke-linecap="round"/>' +
-    '<path d="M38 104 v6" stroke="#FFE7CF" stroke-width="7" stroke-linecap="round"/>' +
-    '<path d="M52 104 v6" stroke="#FFE7CF" stroke-width="7" stroke-linecap="round"/>' +
-    '<path d="M33 111 h10" stroke="#B07A48" stroke-width="5" stroke-linecap="round"/>' +
-    '<path d="M47 111 h10" stroke="#B07A48" stroke-width="5" stroke-linecap="round"/>' +
-    '<g class="egg-mag">' +
-    '<circle cx="60" cy="50" r="10" fill="#DCF3FA" stroke="#C9923C" stroke-width="3"/>' +
-    '<circle cx="57" cy="47" r="2.6" fill="#fff" opacity="0.9"/>' +
-    '<path d="M67 57 l9 11" stroke="#C9923C" stroke-width="4" stroke-linecap="round"/>' +
-    '</g>' +
-    '<g class="egg-star">' +
-    '<path d="M72 22 l3 6 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1 Z" fill="#F9C74F"/>' +
-    '<circle cx="83" cy="36" r="1.6" fill="#F9C74F"/>' +
-    '<circle cx="68" cy="40" r="1.2" fill="#F9C74F"/>' +
-    '</g>' +
-    '</svg>';
-
   const stage = document.createElement("div");
   stage.className = "easter-stage";
   stage.innerHTML =
-    '<div class="easter-girl egg-left" id="easterGirl"><div class="egg-bob">' + GIRL_SVG + "</div></div>";
+    '<div class="easter-girl egg-left" id="easterGirl"><div class="egg-bob">' +
+    '<img class="egg-svg" id="eggImg" src="assets/cat/play/walk-01.png" alt="котёнок-озорник" draggable="false">' +
+    '<span class="egg-dust" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span></div></div>';
   document.body.appendChild(stage);
 
   const girl = stage.firstElementChild;
@@ -3139,15 +3237,119 @@ setMapData();
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const reduceReflow = () => { void girl.offsetLeft; };
 
+  // --- Кадры котёнка: по папкам на сценарий ---
+  const CAT_SET = {
+    thief: "assets/cat/thief/",
+    play: "assets/cat/play/",
+    lick: "assets/cat/lick/",
+    sleep: "assets/cat/sleep/"
+  };
+  const CAT_FACING = {
+    thief: { walk: "right", run: "right" },
+    play: { walk: "right", run: "right" },
+    lick: { walk: "right", run: "right" },
+    sleep: { walk: "right", run: "right" }
+  };
+  const CAT_FALLBACK = { thief: "walk-01", play: "walk-01", lick: "walk-01", sleep: "forward-01" };
+  const CAT_WALK = ["walk-01", "walk-02", "walk-03", "walk-04"];
+  const CAT_RUN = ["run-01", "run-02", "run-03", "run-04"];
+  const CAT_PLAY = ["play-01", "play-02", "play-03", "play-04"];
+  const CAT_LICK = ["lick-01", "lick-02", "lick-03", "lick-04", "lick-05", "lick-06"];
+  const CAT_FWD = { sleep: ["forward-01", "forward-02", "forward-03", "forward-04", "forward-05"] };
+  const CAT_BACK = { sleep: ["back-0", "back-01", "back-02", "back-03", "back-04"] };
+  const CAT_POSE = {
+    "egg-chew": "bite",
+    "egg-squint": "sniff",
+    "egg-happy": "happy",
+    "egg-mag": "look-right",
+    "egg-lookright": "look-right",
+    "egg-tilt": "curious",
+    "egg-nod": "look-up",
+    "egg-lookleft": "look-left",
+    "egg-surprise": "surprised",
+    "egg-tailup": "tail-up",
+    "egg-withtoy": "with-toy",
+    "egg-sit": "sit",
+    "egg-purr": "purr",
+    "egg-sleep": "sleep"
+  };
+  const eggImg = stage.querySelector("#eggImg");
+  let catFrame = 0;
+  let activeSet = "play";
+  const catFrameNames = [].concat(CAT_RUN, CAT_WALK, Object.keys(CAT_POSE).map(function (k) { return CAT_POSE[k]; }),
+    CAT_PLAY, CAT_LICK, Object.keys(CAT_FWD).reduce(function (a, k) { return a.concat(CAT_FWD[k]); }, []),
+    Object.keys(CAT_BACK).reduce(function (a, k) { return a.concat(CAT_BACK[k]); }, []));
+  const catCache = {};
+  Object.keys(CAT_SET).forEach(function (s) {
+    catFrameNames.forEach(function (n) {
+      const im = new Image();
+      im.src = CAT_SET[s] + n + ".png";
+      catCache[s + "/" + n] = im;
+    });
+  });
+
+  function catSrc() {
+    if (girl.classList.contains("is-running")) return CAT_RUN[catFrame % 4];
+    if (girl.classList.contains("is-walking")) {
+      const f = CAT_FWD[activeSet] || CAT_WALK;
+      return f[catFrame % f.length];
+    }
+    if (girl.classList.contains("is-backing")) {
+      const b = CAT_BACK[activeSet] || CAT_RUN;
+      return b[catFrame % b.length];
+    }
+    if (girl.classList.contains("is-playing")) return CAT_PLAY[catFrame % 4];
+    if (girl.classList.contains("is-licking")) return CAT_LICK[catFrame % 6];
+    for (const k in CAT_POSE) {
+      if (girl.classList.contains(k)) return CAT_POSE[k];
+    }
+    return CAT_FALLBACK[activeSet] || "idle";
+  }
+
+  function renderFrame() {
+    const p = CAT_SET[activeSet] + catSrc() + ".png";
+    if (eggImg.getAttribute("src") !== p) eggImg.src = p;
+  }
+
+  function setScene(name) {
+    activeSet = CAT_SET[name] ? name : "play";
+  }
+
+  let lastStep = 0;
+  setInterval(function () {
+    const running = girl.classList.contains("is-running");
+    const walking = girl.classList.contains("is-walking");
+    const backing = girl.classList.contains("is-backing");
+    const playing = girl.classList.contains("is-playing");
+    const licking = girl.classList.contains("is-licking");
+    if (running || walking || backing || playing || licking) {
+      const stepMs = running ? 190 : backing ? 260 : walking ? 300 : playing ? 340 : 380;
+      if (performance.now() - lastStep >= stepMs) {
+        if (activeSet === "sleep" && (walking || backing)) {
+          const len = walking ? (CAT_FWD[activeSet] || CAT_WALK).length : (CAT_BACK[activeSet] || CAT_RUN).length;
+          if (catFrame < len - 1) catFrame++;
+        } else {
+          catFrame++;
+        }
+        lastStep = performance.now();
+      }
+    } else {
+      catFrame = 0;
+    }
+    renderFrame();
+  }, 60);
+
   function setFace(dir) {
-    girl.classList.toggle("egg-right", dir === -1);
-    girl.classList.toggle("egg-left", dir === 1);
+    const walking = girl.classList.contains("is-walking");
+    const facing = CAT_FACING[activeSet] || CAT_FACING.play;
+    const faceLeft = walking ? facing.walk === "left" : facing.run === "left";
+    girl.classList.toggle("egg-right", faceLeft ? dir === 1 : dir === -1);
+    girl.classList.toggle("egg-left", faceLeft ? dir === -1 : dir === 1);
   }
 
   function showGirl() { girl.classList.add("is-visible"); }
   function hideGirl() {
-    girl.classList.remove("is-running", "egg-tilt", "egg-nod", "egg-chew", "egg-squint", "egg-mag", "egg-happy");
-    girl.classList.remove("is-visible");
+    girl.className = "easter-girl egg-left";
   }
 
   function jumpGirl(x, y) {
@@ -3172,8 +3374,13 @@ setMapData();
     span.style.transform = "translate(" + (ax - rect.left) + "px," + (ay - rect.top) + "px)";
   }
 
+  function letterMagnet(span, rect, ax, ay) {
+    span.style.transition = "transform 420ms cubic-bezier(0.18,0.9,0.3,1.3)";
+    span.style.transform = "translate(" + (ax - rect.left) + "px," + (ay - rect.top) + "px)";
+  }
+
   function letterHome(span) {
-    span.style.transition = "transform 0.8s cubic-bezier(0.16,0.9,0.3,1.15)";
+    span.style.transition = "transform 1.6s cubic-bezier(0.16,0.9,0.3,1.15)";
     span.style.transform = "translate(0,0)";
   }
 
@@ -3224,10 +3431,18 @@ setMapData();
     const data = tn.data;
     const idxs = [];
     for (let i = 0; i < data.length; i++) {
-      if (/[\p{L}]/u.test(data[i])) idxs.push(i);
+      if (data.charCodeAt(i) < 0xffff && /[\p{L}]/u.test(data[i])) idxs.push(i);
     }
     if (!idxs.length) return null;
-    const idx = idxs[Math.floor(Math.random() * idxs.length)];
+    const good = [];
+    for (let k = 0; k < idxs.length; k++) {
+      const i = idxs[k];
+      if (i > 0 && data.charCodeAt(i - 1) >= 0xd800 && data.charCodeAt(i - 1) <= 0xdbff) continue;
+      if (i + 1 < data.length && data.charCodeAt(i + 1) >= 0xdc00 && data.charCodeAt(i + 1) <= 0xdfff) continue;
+      good.push(i);
+    }
+    if (!good.length) return null;
+    const idx = good[Math.floor(Math.random() * good.length)];
 
     const range = document.createRange();
     range.setStart(tn, idx);
@@ -3235,24 +3450,13 @@ setMapData();
     const span = document.createElement("span");
     span.className = "egg-letter";
     span.setAttribute("data-egg", "1");
+    span.style.position = "relative";
     try {
       range.surroundContents(span);
     } catch (e) {
       return null;
     }
     return span;
-  }
-
-  /* Видимая картинка портфолио для «Инспектора». */
-  function pickPortImage() {
-    const imgs = document.querySelectorAll(".project-card__cover img, .work img");
-    for (let i = 0; i < imgs.length; i++) {
-      const r = imgs[i].getBoundingClientRect();
-      if (r.width < 80 || r.height < 60) continue;
-      if (r.right < 40 || r.left > innerWidth - 40 || r.bottom < 40 || r.top > innerHeight - 40) continue;
-      return { img: imgs[i], rect: r };
-    }
-    return null;
   }
 
   const W = () => innerWidth;
@@ -3262,126 +3466,169 @@ setMapData();
 
   /* --- Сценарий 1: Воровка буквы --- */
   async function sceneThief() {
-    const span = pickLetter();
+    setScene("thief");
+    let span = null;
+    for (let attempt = 0; attempt < 10 && !span; attempt++) {
+      try { span = pickLetter(); } catch (e) { span = null; }
+    }
     if (!span) return;
     const rect = span.getBoundingClientRect();
     const dir = Math.random() < 0.5 ? -1 : 1;
     const cy = clamp(rect.top + 6, 44, H() - GIRL_H);
+    const startX = dir === 1 ? -GIRL_W - 60 : W() + 60;
+    const standX = clamp(rect.left - dir * 36, 8, Math.max(8, W() - GIRL_W - 8));
 
     setFace(dir);
-    jumpGirl(dir === -1 ? -GIRL_W - 40 : W() + 30, cy);
+    jumpGirl(startX, cy);
     showGirl();
-    girl.classList.add("is-running");
-    await moveTo(dir === -1 ? -GIRL_W - 10 : W() + 10, cy, 60, dir);
 
-    const standX = clamp(rect.left - dir * 36, 8, Math.max(8, W() - GIRL_W - 8));
-    await moveTo(standX, cy, 520, dir);
+    /* 1. Идёт (все walk-кадры) */
+    girl.classList.add("is-walking");
+    await moveTo(standX, cy, 2400, dir);
+    girl.classList.remove("is-walking");
 
-    const handX = standX + dir * 24;
-    const handY = cy + 44;
-    letterAbs(span, rect, handX, handY, 140);
-    await sleep(240);
+    /* 2. Буква примагнитилась к котику */
+    const grabX = standX - dir * 46;
+    const grabY = cy + 58;
+    letterMagnet(span, rect, grabX, grabY);
+    await sleep(560);
 
+    /* 3. Побежал (все run-кадры), тащит букву */
     const exitDir = -dir;
     const exitX = exitDir === 1 ? W() + 110 : -GIRL_W - 60;
-    const letterExit = { x: exitX + (exitDir === 1 ? 34 : -34), y: cy + 44 };
-    const p = moveTo(exitX, cy, 620, exitDir);
-    letterAbs(span, rect, letterExit.x, letterExit.y, 620);
+    const letterExit = { x: exitX + (exitDir === 1 ? 38 : -38), y: cy + 58 };
+    girl.classList.add("is-running");
+    const p = moveTo(exitX, cy, 2300, exitDir);
+    letterAbs(span, rect, letterExit.x, letterExit.y, 2300);
     await p;
     girl.classList.remove("is-running");
     hideGirl();
 
-    await sleep(1300);
+    await sleep(3000);
     letterHome(span);
-    await sleep(900);
+    await sleep(2200);
     removeSpan(span);
   }
 
-  /* --- Сценарий 2: Инспектор --- */
-  async function sceneInspector() {
-    const t = pickPortImage();
-    if (!t) return;
-    const r = t.rect;
-    const dir = Math.random() < 0.5 ? 1 : -1;
-    const cy = clamp(r.top + r.height / 2 - GIRL_H / 2, 44, H() - GIRL_H);
-    const standX = clamp(dir === 1 ? r.left - GIRL_W - 14 : r.right + 12, 8, W() - GIRL_W - 8);
+  /* --- Сценарий 2: Игра --- */
+  async function scenePlay() {
+    setScene("play");
+    const dir = Math.random() < 0.5 ? -1 : 1;
+    const cy = clamp(H() * 0.55, 44, H() - GIRL_H);
+    const startX = dir === 1 ? -GIRL_W - 60 : W() + 60;
+    const playX = clamp(W() * 0.5 + (Math.random() * 0.14 - 0.07) * W(), 30, W() - GIRL_W - 30);
 
-    setFace(-dir);
-    jumpGirl(dir === 1 ? r.left - GIRL_W - 140 : r.right + 100, cy);
+    setFace(dir);
+    jumpGirl(startX, cy);
     showGirl();
-    girl.classList.add("is-running");
-    await moveTo(standX, cy, 600, -dir);
-    girl.classList.remove("is-running");
 
-    girl.classList.add("egg-squint");
-    await moveTo(standX, cy - 10, 240);
-    await sleep(320);
-    girl.classList.add("egg-mag");
-    girl.classList.add("egg-tilt");
-    await sleep(700);
-    girl.classList.remove("egg-tilt");
-    girl.classList.add("egg-squint");
-    await moveTo(standX, cy, 260, -dir);
-    await sleep(400);
-    girl.classList.add("egg-tilt");
-    await sleep(650);
-    girl.classList.remove("egg-tilt", "egg-squint", "egg-mag");
+    // 1. Идёт
+    girl.classList.add("is-walking");
+    await moveTo(playX, cy, 2400, dir);
+    girl.classList.remove("is-walking");
 
-    girl.classList.add("egg-nod");
-    girl.classList.add("egg-happy");
-    await sleep(750);
-    girl.classList.remove("egg-nod", "egg-happy");
+    // 2. Удивляется
+    girl.classList.add("egg-surprise");
+    await sleep(1100);
+    girl.classList.remove("egg-surprise");
 
+    // 3. Играет (все play-кадры)
+    girl.classList.add("is-playing");
+    await sleep(2800);
+    girl.classList.remove("is-playing");
+
+    // 4. Бежит обратно
     const exitDir = -dir;
     const exitX = exitDir === 1 ? W() + 70 : -GIRL_W - 60;
     girl.classList.add("is-running");
-    await moveTo(exitX, cy, 600, exitDir);
+    await moveTo(exitX, cy, 2000, exitDir);
     girl.classList.remove("is-running");
     hideGirl();
   }
 
-  /* --- Сценарий 3: Голодная --- */
-  async function sceneHungry() {
-    const span = pickLetter();
-    if (!span) return;
-    const rect = span.getBoundingClientRect();
+  /* --- Сценарий 4: Сон (всё на одной точке) --- */
+  async function sceneSleep() {
+    setScene("sleep");
+    const standX = clamp(W() * 0.5 + (Math.random() * 0.1 - 0.05) * W(), 30, W() - GIRL_W - 30);
+    const cy = clamp(H() * 0.55, 44, H() - GIRL_H);
+
+    jumpGirl(standX, cy);
+    showGirl();
+
+    /* 1. Вперёд (все forward-кадры строго по нумерации, на месте) */
+    girl.classList.add("is-walking");
+    await sleep(2000);
+    girl.classList.remove("is-walking");
+
+    /* 2. Нюхает */
+    girl.classList.add("egg-squint");
+    await sleep(1200);
+    girl.classList.remove("egg-squint");
+
+    /* 3. Спит (задержка 5 секунд) */
+    girl.classList.add("egg-sleep");
+    await sleep(5000);
+    girl.classList.remove("egg-sleep");
+
+    /* 4. Садится */
+    girl.classList.add("egg-sit");
+    await sleep(1400);
+    girl.classList.remove("egg-sit");
+
+    /* 5. Назад (все back-кадры, на месте) */
+    girl.classList.add("is-backing");
+    await sleep(1600);
+    girl.classList.remove("is-backing");
+    hideGirl();
+  }
+
+  /* --- Сценарий 1: Лизание экрана --- */
+  async function sceneLick() {
+    setScene("lick");
     const dir = Math.random() < 0.5 ? -1 : 1;
-    const cy = clamp(rect.top + 6, 44, H() - GIRL_H);
+    const cy = clamp(H() * 0.55, 44, H() - GIRL_H);
+    const startX = dir === 1 ? -GIRL_W - 60 : W() + 60;
+    const standX = clamp(W() * 0.5 + (Math.random() * 0.1 - 0.05) * W(), 30, W() - GIRL_W - 30);
 
     setFace(dir);
-    jumpGirl(dir === -1 ? -GIRL_W - 40 : W() + 30, cy);
+    jumpGirl(startX, cy);
     showGirl();
-    girl.classList.add("is-running");
-    await moveTo(dir === -1 ? -GIRL_W - 10 : W() + 10, cy, 60, dir);
 
-    const standX = clamp(rect.left - dir * 40, 8, Math.max(8, W() - GIRL_W - 8));
-    await moveTo(standX, cy, 540, dir);
-    girl.classList.remove("is-running");
+    // 1. Идёт
+    girl.classList.add("is-walking");
+    await moveTo(standX, cy, 2400, dir);
+    girl.classList.remove("is-walking");
 
-    const mouthX = standX + dir * 12;
-    const mouthY = cy + 18;
-    letterAbs(span, rect, mouthX, mouthY, 140);
-    await sleep(220);
-    span.classList.add("bitten");
-    girl.classList.add("egg-chew");
-    await sleep(620);
-    girl.classList.remove("egg-chew");
+    // 2. Оглядывается (look-картинки поочерёдно)
+    const looks = ["egg-lookleft", "egg-lookright", "egg-nod", "egg-lookleft", "egg-lookright"];
+    for (let i = 0; i < looks.length; i++) {
+      girl.classList.add(looks[i]);
+      await sleep(950);
+      girl.classList.remove(looks[i]);
+    }
 
+    // 3. Лижет экран
+    girl.classList.add("is-licking");
+    await sleep(2700);
+    girl.classList.remove("is-licking");
+
+    // 4. Садится
+    girl.classList.add("egg-sit");
+    await sleep(900);
+    girl.classList.remove("egg-sit");
+
+    // 5. Довольный
     girl.classList.add("egg-happy");
-    await sleep(820);
+    await sleep(1000);
     girl.classList.remove("egg-happy");
 
+    // 6. Бежит обратно
     const exitDir = -dir;
-    const exitX = exitDir === 1 ? W() + 110 : -GIRL_W - 60;
-    const p = moveTo(exitX, cy, 600, exitDir);
-    span.classList.remove("bitten");
-    letterHome(span);
-    await p;
+    const exitX = exitDir === 1 ? W() + 70 : -GIRL_W - 60;
+    girl.classList.add("is-running");
+    await moveTo(exitX, cy, 2000, exitDir);
     girl.classList.remove("is-running");
     hideGirl();
-
-    await sleep(600);
-    removeSpan(span);
   }
 
   /* --- Таймер бездействия + запуск --- */
@@ -3393,14 +3640,22 @@ setMapData();
   const activityEvts = ["mousemove", "mousedown", "pointerdown", "keydown", "wheel", "scroll", "touchstart", "touchmove", "click"];
   activityEvts.forEach((ev) => window.addEventListener(ev, refreshActivity, { passive: true }));
 
+  const SCENE_ORDER = ["thief", "play", "lick", "sleep"];
+  let sceneIndex = 0;
+
   function runRandomScene() {
     busy = true;
-    const key = Math.random();
+    const forced = window.__eggNext;
+    window.__eggNext = undefined;
+    const valid = forced === "thief" || forced === "play" || forced === "lick" || forced === "sleep";
+    const which = valid ? forced : SCENE_ORDER[sceneIndex % SCENE_ORDER.length];
+    sceneIndex++;
+    console.info("[egg] запуск сценария: " + which);
     const p =
-      key < 0.34 ? sceneThief() :
-      key < 0.67 ? sceneInspector() :
-      sceneHungry();
-    Promise.resolve(p).catch(function () {}).then(function () {
+      which === "thief" ? sceneThief() :
+      which === "lick" ? sceneLick() :
+      which === "sleep" ? sceneSleep() : scenePlay();
+    Promise.resolve(p).catch(function (e) { console.warn("[egg] ошибка сценария:", e); }).then(function () {
       cleanup();
       nextRunAt = Date.now() + EASTER_EGG.COOLDOWN;
       busy = false;
@@ -3415,6 +3670,24 @@ setMapData();
     if (document.querySelector(".lightbox.open, .project-pop.open")) return;
     runRandomScene();
   }, 400);
+
+  (function selfCheck() {
+    try {
+      const modes = ["h1", "h2", "h3", "h4", "h5", "p", "li", "figcaption", "blockquote", "strong", "em", "span"];
+      const els = document.querySelectorAll(modes.join(","));
+      let n = 0;
+      for (let i = 0; i < els.length; i++) {
+        const el = els[i];
+        if (el.closest(".portfolio, .map-tip, .lightbox, .project-pop, .header, .header__nav, header, footer, nav, .easter-stage, .contacts, .stats, .egg-letter, a, button, [data-open], [hidden]")) continue;
+        if (window.getComputedStyle(el).display === "none") continue;
+        if (!el.textContent || el.textContent.trim().length < 8) continue;
+        n++;
+      }
+      console.info("[egg] кандидатов под букву: " + n);
+    } catch (e) {
+      console.warn("[egg] self-check:", e);
+    }
+  })();
 })();
 
 </script>

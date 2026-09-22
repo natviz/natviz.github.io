@@ -1392,7 +1392,7 @@ section {
   }
 }
 
-/* ===== Пасхалка: маленькая девочка ===== */
+/* ===== Пасхалка: маленький котёнок-озорник ===== */
 .easter-stage {
   position: fixed;
   inset: 0;
@@ -1418,10 +1418,13 @@ section {
   height: 100%;
   transform-origin: 50% 100%;
 }
-.easter-girl svg {
+.easter-girl svg,
+.easter-girl img.egg-svg {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
   overflow: visible;
 }
 .easter-girl.egg-left {
@@ -1434,21 +1437,91 @@ section {
   opacity: 1;
 }
 .easter-girl.is-running .egg-bob {
-  animation: egg-run 0.32s ease-in-out infinite;
+  animation: egg-run 0.4s ease-in-out infinite;
 }
-.easter-girl.egg-tilt .egg-bob {
+.easter-girl.is-walking .egg-bob {
+  animation: egg-run 0.6s ease-in-out infinite;
+}
+.easter-girl.egg-tilt .egg-head {
   animation: egg-tilt-anim 0.8s ease-in-out infinite alternate;
 }
-.easter-girl.egg-nod .egg-bob {
+.easter-girl.egg-nod .egg-head {
   animation: egg-nod-anim 0.55s ease-in-out 2;
+}
+.easter-girl .egg-head {
+  transform-box: view-box;
+  transform-origin: 43px 63px;
+  will-change: transform;
 }
 @keyframes egg-run {
   0%,
   100% {
-    transform: translateY(0) rotate(-1.2deg);
+    transform: translateY(-1px) rotate(-1.4deg);
   }
   50% {
-    transform: translateY(-4px) rotate(1.2deg);
+    transform: translateY(-5px) rotate(1.4deg);
+  }
+}
+.easter-girl .egg-leg-fb,
+.easter-girl .egg-leg-fn,
+.easter-girl .egg-leg-bb,
+.easter-girl .egg-leg-bn {
+  transform-box: view-box;
+  will-change: transform;
+}
+.easter-girl .egg-leg-fb {
+  transform-origin: 36px 91px;
+}
+.easter-girl .egg-leg-fn {
+  transform-origin: 41px 91px;
+}
+.easter-girl .egg-leg-bb {
+  transform-origin: 59px 91px;
+}
+.easter-girl .egg-leg-bn {
+  transform-origin: 62px 91px;
+}
+.easter-girl.is-running .egg-leg-fb,
+.easter-girl.is-running .egg-leg-bn {
+  animation: egg-leg-a 0.4s linear infinite;
+}
+.easter-girl.is-running .egg-leg-fn,
+.easter-girl.is-running .egg-leg-bb {
+  animation: egg-leg-b 0.4s linear infinite;
+}
+.easter-girl .egg-tail {
+  transform-box: view-box;
+  transform-origin: 63px 89px;
+  will-change: transform;
+}
+.easter-girl.is-running .egg-tail {
+  animation: egg-tail-wag 0.4s ease-in-out infinite;
+}
+@keyframes egg-leg-a {
+  0%,
+  100% {
+    transform: rotate(-16deg);
+  }
+  50% {
+    transform: rotate(14deg);
+  }
+}
+@keyframes egg-leg-b {
+  0%,
+  100% {
+    transform: rotate(16deg);
+  }
+  50% {
+    transform: rotate(-14deg);
+  }
+}
+@keyframes egg-tail-wag {
+  0%,
+  100% {
+    transform: rotate(6deg);
+  }
+  50% {
+    transform: rotate(-7deg);
   }
 }
 @keyframes egg-tilt-anim {
@@ -1516,6 +1589,79 @@ section {
   50% {
     transform: scaleY(0.55);
   }
+}
+.easter-girl .egg-dust {
+  position: absolute;
+  bottom: 4%;
+  left: 50%;
+  width: 40px;
+  height: 16px;
+  margin-left: -20px;
+  pointer-events: none;
+}
+.easter-girl .egg-dust i {
+  position: absolute;
+  display: block;
+  bottom: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(149, 103, 62, 0.34);
+  opacity: 0;
+}
+.easter-girl.is-running .egg-dust i {
+  animation: egg-dust-anim 0.6s ease-out infinite;
+}
+.easter-girl.is-running .egg-dust i:nth-child(1) {
+  animation-delay: 0s;
+  left: 4px;
+  bottom: 2px;
+}
+.easter-girl.is-running .egg-dust i:nth-child(2) {
+  animation-delay: 0.1s;
+  left: 20px;
+  bottom: 0;
+}
+.easter-girl.is-running .egg-dust i:nth-child(3) {
+  animation-delay: 0.2s;
+  left: 30px;
+  bottom: 3px;
+}
+.easter-girl.is-running .egg-dust i:nth-child(4) {
+  animation-delay: 0.3s;
+  left: -2px;
+  bottom: 1px;
+}
+.easter-girl.is-running .egg-dust i:nth-child(5) {
+  animation-delay: 0.4s;
+  left: 12px;
+  bottom: 0;
+}
+.easter-girl.is-running .egg-dust i:nth-child(6) {
+  animation-delay: 0.5s;
+  left: 26px;
+  bottom: 4px;
+}
+@keyframes egg-dust-anim {
+  0% {
+    opacity: 0.55;
+    transform: translate(0, 0) scale(0.4);
+  }
+  60% {
+    opacity: 0.22;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dsx, 0), -16px) scale(1.5) rotate(var(--dsr, 0deg));
+  }
+}
+.easter-girl.is-running .egg-dust i:nth-child(odd) {
+  --dsx: -9px;
+  --dsr: -32deg;
+}
+.easter-girl.is-running .egg-dust i:nth-child(even) {
+  --dsx: 10px;
+  --dsr: 30deg;
 }
 .egg-letter {
   position: relative;
