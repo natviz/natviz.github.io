@@ -46,7 +46,7 @@ document.querySelectorAll(".work").forEach((work) => {
   const img = work.querySelector("img");
   if (!img) return;
   img.addEventListener("click", () => {
-    const pop = work.closest(".project-pop") || work.closest(".portfolio");
+    const pop = work.closest(".project-pop") || work.closest(".ai-pairs") || work.closest(".portfolio");
     const group = pop ? pop.querySelectorAll(".work img") : [img];
     openLightbox(img, group);
   });
@@ -120,74 +120,53 @@ setTimeout(() => {
   });
 }, 600);
 
-const PROJECTS = [
-  {
-    id: "pop-1",
-    title: "Проект Кухня",
-    city: "",
-    type: "кухня",
-    img: "img/works/Елена Федорцова/Проект Кухня/Подбор вариантов/Общий кадр.jpg",
-    area: 0
-  },
-  {
-    id: "pop-2",
-    title: "Проект Тихий полдень, 71 квадратов, Екатеринбург",
-    city: "Екатеринбург",
-    type: "квартира, 71 м²",
-    img: "img/works/Ксения Муравьева/Квартира 70 квадратов/1.1 Спальня.jpg",
-    x: 217,
-    y: 370,
-    area: 71
-  },
-  {
-    id: "pop-3",
-    title: "Проект Итальянская вилла, 102 квадрата, Санкт-Петербург",
-    city: "Санкт-Петербург",
-    type: "двухуровневая квартира, 102 м²",
-    img: "img/works/Мария Чернышова/Проект Итальянская вилла 102 квадрата, Санкт-Петербург/Спальня родителей.jpg",
-    x: 95,
-    y: 335,
-    area: 102
-  },
-  {
-    id: "pop-4",
-    title: "Проект Скалистый утес, 103 квадрата, Санкт-Петербург",
-    city: "Санкт-Петербург",
-    type: "двухуровневая квартира, 103 м²",
-    img: "img/works/Мария Чернышова/Проект Скалистый утес, 103 квадрата, Санкт-Петербург/1.jpg",
-    x: 105,
-    y: 325,
-    area: 103
-  },
-  {
-    id: "pop-5",
-    title: "Проект Мягкий Ритм, 40 квадратов, Москва",
-    city: "Москва",
-    type: "квартира, 40 м²",
-    img: "img/works/Ксения Фадеева/Проект Мягкий Ритм, 40 квадратов, Москва/3. Кухня.jpg",
-    x: 128.5,
-    y: 384.6,
-    area: 40
-  },
-  {
-    id: "pop-6",
-    title: "Проект Тихая роскошь, 27 квадратов, Санкт-Петербург",
-    city: "Санкт-Петербург",
-    type: "квартира, 27 м²",
-    img: "img/works/Мария Чернышова/Проект Тихая роскошь, 27 квадратов, Санкт-Петербург/1.0 Спальня.jpg",
-    x: 98,
-    y: 332,
-    area: 27
-  },
-  {
-    id: "pop-7",
-    title: "Монохром в голубых тонах",
-    city: "",
-    type: "квартира, 32 м²",
-    img: "img/works/Монохром в голубых тонах, 32 квадрата/close_up.jpg",
-    area: 32
-  }
-];
+const CITY_POS = {
+  "Санкт-Петербург": { x: 95, y: 335 },
+  "Москва": { x: 128.5, y: 384.6 },
+  "Екатеринбург": { x: 217, y: 370 },
+  "Брянск": { x: 152, y: 428 }
+};
+
+function parseProjectArea(title) {
+  const m = title.match(/(\d+)\s*(?:квадрат(?:а|ов|ы)?|м²)/i);
+  return m ? parseInt(m[1], 10) : 0;
+}
+
+function parseProjectCity(title) {
+  const parts = title.split(",").map((s) => s.trim()).filter(Boolean);
+  if (parts.length < 2) return "";
+  const last = parts[parts.length - 1];
+  if (/\d/.test(last)) return "";
+  return last.replace(/^г\.?\s*/i, "").replace(/[,.\s]+$/, "").trim();
+}
+
+function collectProjects() {
+  const projects = [];
+  document.querySelectorAll("#portfolio .project-group .project-card").forEach((card) => {
+    const open = card.getAttribute("data-open") || "";
+    const titleEl = card.querySelector(".project-card__title");
+    const imgEl = card.querySelector(".project-card__cover img");
+    const title = titleEl ? titleEl.textContent.trim() : "";
+    const area = parseProjectArea(title);
+    const city = parseProjectCity(title);
+    const pos = CITY_POS[city];
+    if (!area) return;
+    projects.push({
+        id: open,
+        pop: open,
+        title,
+        city,
+        type: area ? area + " м²" : "",
+        img: imgEl ? imgEl.getAttribute("src") : "",
+        area,
+        x: pos ? pos.x : null,
+        y: pos ? pos.y : null
+      });
+  });
+  return projects;
+}
+
+const PROJECTS = collectProjects();
 
 function openProject(targetId) {
   const pop = document.getElementById(targetId);
@@ -266,7 +245,7 @@ function setMapData() {
   const cities = [];
   const cityIndex = new Map();
   PROJECTS.forEach((p) => {
-    if (!p.city || !p.city.trim()) return;
+    if (!p.city || !p.city.trim() || p.x == null || p.y == null) return;
     if (!cityIndex.has(p.city)) {
       const entry = { city: p.city, x: p.x, y: p.y, projects: [] };
       cityIndex.set(p.city, entry);
@@ -329,8 +308,8 @@ function setMapData() {
 
     const cardRect = mapCard.getBoundingClientRect();
     const svgRect = mapSvg.getBoundingClientRect();
-    const nX = (city.x / 1000) * svgRect.width;
-    const nY = (city.y / 560) * svgRect.height;
+    const nX = ((city.x - 0) / 1000) * svgRect.width;
+    const nY = ((city.y - -85.5) / 622.8) * svgRect.height;
     let tipX = svgRect.left - cardRect.left + nX;
     let tipY = svgRect.top - cardRect.top + nY;
     mapTip.style.left = tipX + "px";
@@ -443,7 +422,7 @@ setMapData();
   const EASTER_EGG = {
     enabled: true,      // false — полностью отключить пасхалку
     IDLE_DELAY: 3000,   // мс бездействия до запуска
-    COOLDOWN: 6000      // мс паузы между сценариями
+    COOLDOWN: 8000      // мс паузы между сценариями
   };
   if (!EASTER_EGG.enabled) return;
 
