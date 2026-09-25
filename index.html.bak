@@ -2038,7 +2038,10 @@ section {
             <p>📩 Напишите в личные сообщения для расчёта</p>
           </div>
 
-</div>
+          <div class="tariffs__cta">
+            <a class="btn btn--dark" href="tel:+79046176661">Рассчитать проект</a>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -2789,7 +2792,8 @@ section {
                   </figure>
                 </div>
             </div>
-            <article class="project-card" data-open="pop-1">
+          </div>
+<article class="project-card" data-open="pop-1">
               <div class="project-card__cover">
                 <img src="img/covers/cover-01.jpg" alt="Проект Кухня — 3D-визуализация интерьера кухни, 12 квадратов" loading="lazy">
               </div>
@@ -2845,7 +2849,7 @@ section {
                   </figure>
                 </div>
               </div>
-          </div>        </div>
+            </div>
 
           </div>
         
