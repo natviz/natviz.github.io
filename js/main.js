@@ -871,7 +871,7 @@ setMapData();
     if (document.visibilityState !== "visible") return;
     if (Date.now() < nextRunAt) return;
     if (Date.now() - lastActivity < EASTER_EGG.IDLE_DELAY) return;
-    if (document.querySelector(".lightbox.open, .project-pop.open")) return;
+    if (document.querySelector(".lightbox.open, .project-pop.open, .pano-viewer.open")) return;
     runRandomScene();
   }, 400);
 
@@ -892,4 +892,461 @@ setMapData();
       console.warn("[egg] self-check:", e);
     }
   })();
+})();
+
+/* ============ Панорамы 360° (WebGL) ============ */
+(function () {
+  const viewer = document.getElementById("panoViewer");
+  const canvas = document.getElementById("panoCanvas");
+  const closeBtn = document.getElementById("panoViewerClose");
+  const resetBtn = document.getElementById("panoViewerReset");
+  const hint = document.getElementById("panoViewerHint");
+  if (!viewer || !canvas || !closeBtn) return;
+
+  const VERT_SRC = [
+    "attribute vec3 aPos;",
+    "attribute vec2 aUV;",
+    "uniform mat4 uView;",
+    "uniform mat4 uProj;",
+    "varying vec2 vUV;",
+    "void main() {",
+    "  vUV = aUV;",
+    "  gl_Position = uProj * uView * vec4(aPos, 1.0);",
+    "}"
+  ].join("\n");
+
+  const FRAG_SRC = [
+    "precision mediump float;",
+    "varying vec2 vUV;",
+    "uniform sampler2D uTex;",
+    "void main() {",
+    "  gl_FragColor = texture2D(uTex, vUV);",
+    "}"
+  ].join("\n");
+
+  let gl = null;
+  let program = null;
+  let sphereVerts = null;
+  let sphereLen = 0;
+  let texture = null;
+  let texLoaded = false;
+  let texReady = false;
+  let currentSrc = "";
+  let yaw = 0;
+  let pitch = 0;
+  let fov = 72;
+  let startYaw = 0.2;
+  let startPitch = 0;
+  let startFov = 72;
+  const FOV_MIN = 35;
+  const FOV_MAX = 110;
+  let rafId = 0;
+  let active = false;
+  let dragState = null;
+  let pinchDist = 0;
+  let pinchFov = 72;
+
+  function compile(type, src) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      console.warn("[pano] shader error:", gl.getShaderInfoLog(s));
+      return null;
+    }
+    return s;
+  }
+
+  function buildProgram() {
+    const vs = compile(gl.VERTEX_SHADER, VERT_SRC);
+    const fs = compile(gl.FRAGMENT_SHADER, FRAG_SRC);
+    if (!vs || !fs) return null;
+    const p = gl.createProgram();
+    gl.attachShader(p, vs);
+    gl.attachShader(p, fs);
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+      console.warn("[pano] program error:", gl.getProgramInfoLog(p));
+      return null;
+    }
+    return p;
+  }
+
+  function buildSphere() {
+    const seg = 120;
+    const rows = 60;
+    const pos = [];
+    const uv = [];
+    const idx = [];
+    for (let r = 0; r <= rows; r++) {
+      const lat = (r / rows) * Math.PI;                        // 0..PI
+      const y = Math.cos(lat);
+      const rr = Math.sin(lat);
+      for (let c = 0; c <= seg; c++) {
+        const lon = (c / seg) * Math.PI * 2;                   // 0..2PI
+        const x = Math.sin(lon) * rr;
+        const z = -Math.cos(lon) * rr;
+        pos.push(x, y, z);
+        uv.push((c / seg) + 0.5, r / rows);                    // u в [0.5, 1.5], бесшовно через REPEAT
+      }
+    }
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < seg; c++) {
+        const a = r * (seg + 1) + c;
+        const b = a + 1;
+        const d = a + seg + 1;
+        const e = d + 1;
+        idx.push(a, b, d, b, e, d);
+      }
+    }
+    const bufPos = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufPos);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pos), gl.STATIC_DRAW);
+    const bufUV = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, bufUV);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uv), gl.STATIC_DRAW);
+    const bufIdx = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bufIdx);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(idx), gl.STATIC_DRAW);
+    sphereLen = idx.length;
+    return { bufPos: bufPos, bufUV: bufUV, bufIdx: bufIdx };
+  }
+
+  function mat4Perspective(fovDeg, aspect, near, far) {
+    const f = 1.0 / Math.tan((fovDeg * Math.PI) / 360.0);
+    const nf = 1.0 / (near - far);
+    return [
+      f / aspect, 0, 0, 0,
+      0, f, 0, 0,
+      0, 0, (far + near) * nf, -1,
+      0, 0, 2 * far * near * nf, 0
+    ];
+  }
+
+  function mat4RotY(a) {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [
+      c, 0, -s, 0,
+      0, 1, 0, 0,
+      s, 0, c, 0,
+      0, 0, 0, 1
+    ];
+  }
+
+  function mat4RotX(a) {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [
+      1, 0, 0, 0,
+      0, c, -s, 0,
+      0, s, c, 0,
+      0, 0, 0, 1
+    ];
+  }
+
+  function mat4Mul(a, b) {
+    const o = new Array(16);
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        let v = 0;
+        for (let k = 0; k < 4; k++) v += a[r * 4 + k] * b[k * 4 + c];
+        o[r * 4 + c] = v;
+      }
+    }
+    return o;
+  }
+
+  function render() {
+    if (!gl || !active) return;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.clearColor(0.06, 0.05, 0.03, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+
+    if (!texReady || !texLoaded) { rafId = requestAnimationFrame(render); return; }
+
+    gl.useProgram(program);
+    const proj = mat4Perspective(fov, canvas.width / canvas.height, 0.1, 100);
+    const view = mat4Mul(mat4RotY(yaw), mat4RotX(pitch));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "uProj"), false, new Float32Array(proj));
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "uView"), false, new Float32Array(view));
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.uniform1i(gl.getUniformLocation(program, "uTex"), 0);
+
+    gl.enableVertexAttribArray(0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereVerts.bufPos);
+    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(1);
+    gl.bindBuffer(gl.ARRAY_BUFFER, sphereVerts.bufUV);
+    gl.vertexAttribPointer(1, 2, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVerts.bufIdx);
+    gl.drawElements(gl.TRIANGLES, sphereLen, gl.UNSIGNED_SHORT, 0);
+
+    rafId = requestAnimationFrame(render);
+  }
+
+  function loadTexture(src) {
+    currentSrc = src;
+    texLoaded = false;
+    texReady = false;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function () {
+      if (!gl || currentSrc !== src) return;
+      let source = img;
+      const maxTex = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+      let cw = img.width;
+      let ch = img.height;
+      if (isGL2) {
+        if (img.width > maxTex || img.height > maxTex) {
+          const k = Math.min(maxTex / img.width, maxTex / img.height);
+          cw = Math.max(1, Math.floor(img.width * k));
+          ch = Math.max(1, Math.floor(img.height * k));
+        }
+      } else {
+        cw = Math.pow(2, Math.floor(Math.log2(Math.min(img.width, maxTex))));
+        ch = Math.pow(2, Math.floor(Math.log2(Math.min(img.height, maxTex))));
+      }
+      if (cw !== img.width || ch !== img.height) {
+        const c = document.createElement("canvas");
+        c.width = cw;
+        c.height = ch;
+        const ctx = c.getContext("2d");
+        ctx.drawImage(img, 0, 0, cw, ch);
+        source = c;
+      }
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, source);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      try { gl.generateMipmap(gl.TEXTURE_2D); } catch (err) {}
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      texLoaded = true;
+      texReady = true;
+    };
+    img.onerror = function () {
+      console.warn("[pano] не удалось загрузить панораму:", src);
+    };
+    img.src = src;
+  }
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(2, Math.floor(canvas.clientWidth * dpr));
+    canvas.height = Math.max(2, Math.floor(canvas.clientHeight * dpr));
+  }
+
+  function updateHint(forceHidden) {
+    if (hint) hint.classList.toggle("pano-viewer__hint--hidden", !!forceHidden);
+  }
+
+  function openViewer(src, title) {
+    if (active) closeViewer();
+    active = true;
+    viewer.classList.add("open");
+    if (texture === null) {
+      texture = gl.createTexture();
+    }
+    updateHint(false);
+    setTimeout(function () { updateHint(true); }, 3600);
+    startYaw = 0.2;
+    startPitch = 0;
+    startFov = 72;
+    resetView();
+    loadTexture(src);
+    resize();
+    render();
+    document.body.style.overflow = "hidden";
+    canvas.focus();
+  }
+
+  function resetView() {
+    yaw = startYaw;
+    pitch = startPitch;
+    fov = startFov;
+    render();
+  }
+
+  function closeViewer() {
+    active = false;
+    viewer.classList.remove("open");
+    if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
+    document.body.style.overflow = "";
+    currentSrc = "";
+  }
+
+  /* ------- pointer / touch / wheel ------- */
+  const activePointers = new Map();
+
+  function currentPinchDist() {
+    const pts = Array.from(activePointers.values());
+    if (pts.length !== 2) return 0;
+    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y) || 1;
+  }
+
+  function onPointerDown(e) {
+    if (!active) return;
+    updateHint(true);
+    activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (activePointers.size === 2) {
+      dragState = null;
+      pinchDist = currentPinchDist();
+      pinchFov = fov;
+      return;
+    }
+    if (activePointers.size === 1) {
+      dragState = { sx: e.clientX, sy: e.clientY, y0: yaw, p0: pitch };
+    }
+    try { e.preventDefault(); } catch (err) {}
+  }
+
+  function onPointerMove(e) {
+    if (!active) return;
+    if (activePointers.has(e.pointerId)) {
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+    if (activePointers.size === 2) {
+      const d = currentPinchDist();
+      if (d > 0) {
+        const k = pinchFov * (pinchDist / d);
+        fov = Math.min(FOV_MAX, Math.max(FOV_MIN, k));
+      }
+      dragState = null;
+      try { e.preventDefault(); } catch (err) {}
+      return;
+    }
+    if (!dragState) return;
+    const s = 0.12;
+    const dx = e.clientX - dragState.sx;
+    const dy = e.clientY - dragState.sy;
+    if (Math.abs(dx) >= Math.abs(dy)) {
+      yaw = dragState.y0 - dx * s * 0.01;
+      pitch = dragState.p0;
+    } else {
+      pitch = dragState.p0 - dy * s * 0.01;
+      yaw = dragState.y0;
+    }
+    const lim = 85 * Math.PI / 180;
+    pitch = Math.max(-lim, Math.min(lim, pitch));
+    try { e.preventDefault(); } catch (err) {}
+  }
+
+  function onPointerEnd(e) {
+    if (!active) return;
+    activePointers.delete(e.pointerId);
+    if (activePointers.size < 2) pinchDist = 0;
+    if (activePointers.size === 0) dragState = null;
+  }
+
+  function onWheel(e) {
+    if (!active) return;
+    fov = Math.min(FOV_MAX, Math.max(FOV_MIN, fov + (e.deltaY > 0 ? 1 : -1) * 1.1));
+    try { e.preventDefault(); } catch (err) {}
+  }
+
+  /* ------- init ------- */
+  let isGL2 = false;
+  try { gl = canvas.getContext("webgl2"); if (gl) isGL2 = true; } catch (err) { gl = null; }
+  if (!gl) {
+    try { gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl"); } catch (err) { gl = null; }
+  }
+  if (!gl) {
+    console.warn("[pano] WebGL недоступен — панорамы 360° отключены");
+    document.querySelectorAll(".pano-card").forEach(function (c) { c.style.display = "none"; });
+    document.querySelectorAll(".pano-viewer").forEach(function (v) { v.remove(); });
+    return;
+  }
+
+  program = buildProgram();
+  sphereVerts = buildSphere();
+  if (!program) {
+    document.querySelectorAll(".pano-card").forEach(function (c) { c.style.display = "none"; });
+    return;
+  }
+
+  if (hint) { hint.setAttribute("aria-hidden", "false"); }
+
+  function bindCard(card) {
+    card.addEventListener("click", function (e) {
+      if (e.target.closest("a,button,.pano-card__btn")) {
+        e.preventDefault();
+      }
+      const src = card.getAttribute("data-pano") || "";
+      const title = card.getAttribute("data-pano-title") || "";
+      if (src) openViewer(src, title);
+    });
+  }
+
+  function appendCard(src, thumb, title) {
+    const grid = document.getElementById("panoGrid");
+    if (!grid) return;
+    const card = document.createElement("article");
+    card.className = "pano-card";
+    card.setAttribute("data-pano", src);
+    card.setAttribute("data-pano-title", title);
+    card.innerHTML =
+      '<div class="pano-card__media">' +
+      '<img src="' + thumb + '" alt="Панорама 360° — ' + title + '" loading="lazy">' +
+      '<span class="pano-card__badge">360°</span>' +
+      '<div class="pano-card__play" aria-hidden="true">' +
+      '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5.5a1 1 0 0 1 1.54-.84l9 6a1 1 0 0 1 0 1.68l-9 6A1 1 0 0 1 8 17.5v-12z"/></svg>' +
+      '</div>' +
+      '</div>' +
+      '<div class="pano-card__body">' +
+      '<h3 class="pano-card__title"></h3>' +
+      '<button class="btn btn--ghost pano-card__btn" type="button">Смотреть 360°</button>' +
+      '</div>';
+    card.querySelector(".pano-card__title").textContent = title;
+    grid.appendChild(card);
+    bindCard(card);
+  }
+
+  function buildCardsFromList() {
+    fetch("assets/panoramas/list.json")
+      .then(function (r) {
+        if (!r.ok) throw new Error("list not available");
+        return r.json();
+      })
+      .then(function (items) {
+        if (!Array.isArray(items) || items.length === 0) return;
+        const grid = document.getElementById("panoGrid");
+        if (grid) grid.innerHTML = "";
+        items.forEach(function (item) {
+          appendCard(
+            item.src || "",
+            item.thumb || item.src || "",
+            item.title || "Панорама 360°"
+          );
+        });
+      })
+      .catch(function () {
+        document.querySelectorAll(".pano-card").forEach(bindCard);
+      });
+  }
+
+  buildCardsFromList();
+
+  closeBtn.addEventListener("click", closeViewer);
+  if (resetBtn) {
+    resetBtn.addEventListener("click", function () {
+      if (active) resetView();
+    });
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && active) closeViewer();
+  });
+
+  canvas.addEventListener("pointerdown", onPointerDown);
+  canvas.addEventListener("pointermove", onPointerMove);
+  canvas.addEventListener("pointerup", onPointerEnd);
+  canvas.addEventListener("pointercancel", onPointerEnd);
+  canvas.addEventListener("wheel", onWheel, { passive: false });
+  canvas.addEventListener("contextmenu", function (e) { e.preventDefault(); });
+
+  window.addEventListener("resize", function () {
+    if (active) resize();
+  });
 })();
