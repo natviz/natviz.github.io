@@ -19,6 +19,7 @@ let lightboxGroup = [];
 let lightboxIndex = 0;
 
 function openLightbox(img, group) {
+  if (!lightbox) return;
   lightboxGroup = Array.prototype.slice.call(group || [img]);
   lightboxIndex = lightboxGroup.indexOf(img);
   if (lightboxIndex < 0) lightboxIndex = 0;
@@ -28,6 +29,7 @@ function openLightbox(img, group) {
 }
 
 function updateLightbox() {
+  if (!lightboxImg) return;
   const img = lightboxGroup[lightboxIndex];
   if (!img) return;
   lightboxImg.src = img.src;
@@ -53,14 +55,15 @@ document.querySelectorAll(".work").forEach((work) => {
 });
 
 function closeLightbox() {
+  if (!lightbox) return;
   lightbox.classList.remove("open");
   lightboxImg.src = "";
   lightboxGroup = [];
   document.body.style.overflow = "";
 }
 
-lightboxClose.addEventListener("click", closeLightbox);
-lightbox.addEventListener("click", (e) => {
+if (lightboxClose) lightboxClose.addEventListener("click", closeLightbox);
+if (lightbox) lightbox.addEventListener("click", (e) => {
   if (e.target === lightbox) closeLightbox();
 });
 if (lightboxPrev) lightboxPrev.addEventListener("click", (e) => {
@@ -75,23 +78,6 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeLightbox();
   if (e.key === "ArrowLeft") stepLightbox(-1);
   if (e.key === "ArrowRight") stepLightbox(1);
-});
-
-const projectCards = document.querySelectorAll(".project-card");
-projectCards.forEach((card) => {
-  card.addEventListener("click", () => {
-    const targetId = card.getAttribute("data-open");
-    const pop = document.getElementById(targetId);
-    if (!pop) return;
-    const alreadyOpen = pop.classList.contains("open");
-    document.querySelectorAll(".project-pop.open").forEach((p) => {
-      p.classList.remove("open");
-    });
-    if (!alreadyOpen) {
-      pop.classList.add("open");
-      pop.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-  });
 });
 
 const revealEls = document.querySelectorAll("section, .card");
@@ -143,7 +129,7 @@ function parseProjectCity(title) {
 function collectProjects() {
   const projects = [];
   document.querySelectorAll("#portfolio .project-group .project-card").forEach((card) => {
-    const open = card.getAttribute("data-open") || "";
+    const href = card.getAttribute("href") || "";
     const titleEl = card.querySelector(".project-card__title");
     const imgEl = card.querySelector(".project-card__cover img");
     const title = titleEl ? titleEl.textContent.trim() : "";
@@ -152,8 +138,9 @@ function collectProjects() {
     const pos = CITY_POS[city];
     if (!area) return;
     projects.push({
-        id: open,
-        pop: open,
+        id: href,
+        pop: href,
+        href: href,
         title,
         city,
         type: area ? area + " м²" : "",
@@ -167,19 +154,6 @@ function collectProjects() {
 }
 
 const PROJECTS = collectProjects();
-
-function openProject(targetId) {
-  const pop = document.getElementById(targetId);
-  if (!pop) return;
-  const alreadyOpen = pop.classList.contains("open");
-  document.querySelectorAll(".project-pop.open").forEach((p) => {
-    p.classList.remove("open");
-  });
-  if (!alreadyOpen) {
-    pop.classList.add("open");
-    pop.scrollIntoView({ behavior: "smooth", block: "nearest" });
-  }
-}
 
 function animateCountTo(el, target, onTick) {
   if (!el) return Promise.resolve();
@@ -269,16 +243,17 @@ function setMapData() {
     city.projects.forEach((p) => {
       const item = document.createElement("a");
       item.className = "map-tip__item";
-      item.href = "#";
+      item.href = p.href || "#";
       item.setAttribute("role", "button");
       item.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
         mapTip.classList.remove("is-open");
-        if (p.pop) {
-          openProject(p.pop);
+        if (p.href) {
+          location.href = p.href;
         } else {
-          document.getElementById("portfolio").scrollIntoView({ behavior: "smooth" });
+          const pf = document.getElementById("portfolio");
+          if (pf) pf.scrollIntoView({ behavior: "smooth" });
         }
       });
 
@@ -380,9 +355,9 @@ function setMapData() {
 
     g.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (city.projects.length === 1 && city.projects[0].pop) {
+      if (city.projects.length === 1 && city.projects[0].href) {
         hideTip();
-        openProject(city.projects[0].pop);
+        location.href = city.projects[0].href;
       } else {
         clearTimeout(hideTimer);
         showTip(city);
@@ -437,7 +412,13 @@ setMapData();
   document.body.appendChild(stage);
 
   const girl = stage.firstElementChild;
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let aborted = false;
+  let abortHooks = [];
+  const sleep = (ms) => new Promise((r) => {
+    if (aborted) { r(); return; }
+    const t = setTimeout(r, ms);
+    abortHooks.push(() => { clearTimeout(t); r(); });
+  });
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const reduceReflow = () => { void girl.offsetLeft; };
 
@@ -564,12 +545,14 @@ setMapData();
   }
 
   function moveTo(x, y, dur, face) {
+    if (aborted) return Promise.resolve();
     if (face) setFace(face);
     return new Promise((res) => {
       girl.style.transition = "left " + dur + "ms cubic-bezier(0.4,0.2,0.3,1), top " + dur + "ms cubic-bezier(0.4,0.2,0.3,1)";
       girl.style.left = x + "px";
       girl.style.top = y + "px";
-      setTimeout(res, dur + 60);
+      const t = setTimeout(res, dur + 60);
+      abortHooks.push(() => { clearTimeout(t); res(); });
     });
   }
 
@@ -601,6 +584,22 @@ setMapData();
       removeSpan(sp);
     });
     hideGirl();
+  }
+
+  /* Полная остановка текущего сценария (при взаимодействии с сайтом). */
+  function abortScene() {
+    aborted = true;
+    const hooks = abortHooks;
+    abortHooks = [];
+    for (let k = 0; k < hooks.length; k++) {
+      try { hooks[k](); } catch (e) {}
+    }
+    girl.classList.remove("is-walking", "is-running", "is-backing", "is-playing", "is-licking",
+      "egg-surprise", "egg-squint", "egg-happy", "egg-sleep", "egg-sit", "egg-nod",
+      "egg-lookleft", "egg-lookright");
+    cleanup();
+    busy = false;
+    nextRunAt = Date.now() + EASTER_EGG.COOLDOWN;
   }
 
   /* Случайная буква в обычном тексте (не в портфолио, не в попапах). */
@@ -840,15 +839,20 @@ setMapData();
   let busy = false;
   let nextRunAt = Date.now() + EASTER_EGG.COOLDOWN;
 
-  const refreshActivity = () => { lastActivity = Date.now(); };
+  const onActivity = () => {
+    lastActivity = Date.now();
+    if (busy) abortScene();
+  };
   const activityEvts = ["mousemove", "mousedown", "pointerdown", "keydown", "wheel", "scroll", "touchstart", "touchmove", "click"];
-  activityEvts.forEach((ev) => window.addEventListener(ev, refreshActivity, { passive: true }));
+  activityEvts.forEach((ev) => window.addEventListener(ev, onActivity, { passive: true }));
 
   const SCENE_ORDER = ["thief", "play", "lick", "sleep"];
   let sceneIndex = 0;
 
   function runRandomScene() {
     busy = true;
+    aborted = false;
+    abortHooks = [];
     const forced = window.__eggNext;
     window.__eggNext = undefined;
     const valid = forced === "thief" || forced === "play" || forced === "lick" || forced === "sleep";
@@ -901,6 +905,8 @@ setMapData();
   const closeBtn = document.getElementById("panoViewerClose");
   const resetBtn = document.getElementById("panoViewerReset");
   const hint = document.getElementById("panoViewerHint");
+
+  if (!canvas || !viewer) return;
   if (!viewer || !canvas || !closeBtn) return;
 
   const VERT_SRC = [

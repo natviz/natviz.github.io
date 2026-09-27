@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #faf7f1;
   --bg-soft: #f2ecdf;
   --surface: #fffdf8;
@@ -1160,7 +1160,7 @@ section {
   grid-template-columns: repeat(3, 1fr);
 }
 
-/* Атмосфера ИИ: два столбца (рендер | ИИ) со стрелкой между ними */
+/* РђС‚РјРѕСЃС„РµСЂР° РР: РґРІР° СЃС‚РѕР»Р±С†Р° (СЂРµРЅРґРµСЂ | РР) СЃРѕ СЃС‚СЂРµР»РєРѕР№ РјРµР¶РґСѓ РЅРёРјРё */
 .project-pop__intro {
   font-family: var(--font-sans);
   font-size: 1rem;
@@ -1547,7 +1547,7 @@ section {
   }
 }
 
-/* ===== Пасхалка: маленький котёнок-озорник ===== */
+/* ===== РџР°СЃС…Р°Р»РєР°: РјР°Р»РµРЅСЊРєРёР№ РєРѕС‚С‘РЅРѕРє-РѕР·РѕСЂРЅРёРє ===== */
 .easter-stage {
   position: fixed;
   inset: 0;
@@ -1837,7 +1837,7 @@ section {
   }
 }
 
-/* ============ Панорамы 360° ============ */
+/* ============ РџР°РЅРѕСЂР°РјС‹ 360В° ============ */
 .panoramas {
   background: var(--bg-soft);
 }
@@ -1944,7 +1944,7 @@ section {
   justify-content: center;
 }
 
-/* Viewer поверх страницы */
+/* Viewer РїРѕРІРµСЂС… СЃС‚СЂР°РЅРёС†С‹ */
 .pano-viewer {
   position: fixed;
   inset: 0;
@@ -2069,3 +2069,34 @@ section {
     padding: 8px 14px;
   }
 }
+
+/* Многостраничность: активный пункт меню */
+.header__nav a.active { color: var(--text); }
+.header__nav a.active::after { transform: scaleX(1); }
+
+/* Страница проекта */
+.proj { padding: 72px 0 96px; }
+.proj-back { display: inline-block; margin-bottom: 26px; color: var(--text-muted); font-size: 14px; font-weight: 600; text-decoration: none; }
+.proj-back:hover { color: var(--accent); }
+.proj-title { font-family: var(--font-serif); font-size: 34px; font-weight: 600; margin: 0 0 40px; }
+.proj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 18px; }
+.proj-thumb { position: relative; display: block; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); background: #fffdf8; }
+.proj-thumb img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform 0.3s; }
+.proj-thumb:hover img { transform: scale(1.03); }
+.proj-thumb__num { position: absolute; left: 10px; bottom: 10px; background: rgba(0, 0, 0, 0.55); color: #fff; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+
+/* Страница кадра */
+.frame { padding: 48px 0 96px; }
+.frame__stage { display: flex; align-items: center; gap: 14px; }
+.frame__nav-btn { flex: 0 0 auto; width: 48px; height: 48px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 50%; background: #fffdf8; color: var(--text); text-decoration: none; font-size: 20px; transition: border-color 0.2s, color 0.2s; }
+.frame__nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+.frame__nav-btn.is-disabled { opacity: 0.35; pointer-events: none; }
+.frame__figure { flex: 1; min-width: 0; margin: 0; }
+.frame__figure img { display: block; width: 100%; max-height: 80vh; object-fit: contain; border-radius: 14px; }
+
+@media (max-width: 640px) {
+  .proj-grid { grid-template-columns: 1fr; }
+  .frame__stage { gap: 6px; }
+  .frame__nav-btn { width: 38px; height: 38px; font-size: 18px; }
+}
+a.project-card { display: block; text-decoration: none; color: inherit; }
