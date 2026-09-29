@@ -100,8 +100,14 @@ while ($listener.IsListening) {
             $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length)
             $ctx.Response.StatusCode = 200
         } else {
-            $full = [System.IO.Path]::GetFullPath((Join-Path $root $rel))
+            $rel2 = $rel
+            if ($rel2 -eq 'index') { $rel2 = 'index.html' }
+            $full = [System.IO.Path]::GetFullPath((Join-Path $root $rel2))
             $rootFull = [System.IO.Path]::GetFullPath($root)
+            if (-not (Test-Path -LiteralPath $full -PathType Leaf) -and $rel2 -notmatch '\.[A-Za-z0-9]+$') {
+                $try = [System.IO.Path]::GetFullPath((Join-Path $root ($rel2 + '.html')))
+                if (Test-Path -LiteralPath $try -PathType Leaf) { $rel2 = $rel2 + '.html'; $full = $try }
+            }
             if ($full.StartsWith($rootFull) -and (Test-Path -LiteralPath $full -PathType Leaf)) {
                 $bytes = [System.IO.File]::ReadAllBytes($full)
                 $ext = [System.IO.Path]::GetExtension($full).ToLower()
